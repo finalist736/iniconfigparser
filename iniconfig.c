@@ -35,10 +35,27 @@ struct ConfigNode* ConfigLoad(const char *filename)
     char *name = NULL, *value = NULL; // temp to allocate memory for names and values
     struct ConfigNode *begin = NULL; // begin of config nodes
     int len = 0; // temporary length var
+    char firstLetter = ' ';
     while(!feof(f)) // while end of file not reached
     {
         memset(str, 0, CONFIG_FILE_LINE_MAXLENGTH);
         fgets(str, CONFIG_FILE_LINE_MAXLENGTH - 1, f); // read line from file
+
+        // check for empty lines
+        // [Sections] lines
+        // ; and # comments lines
+        // and skip all of them
+        if (strlen(str) == 0)
+        {
+            continue;
+        }
+        firstLetter = str[0];
+        if (firstLetter == '[' || firstLetter == ';' ||
+                firstLetter == '#' || firstLetter == '\n')
+        {
+            continue;
+        }
+
         tmp = str;
         tok = strchr(tmp, '='); // search name, that before '='
         if (tok == NULL)
