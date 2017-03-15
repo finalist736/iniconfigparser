@@ -1,9 +1,10 @@
+#define _CRT_SECURE_NO_WARNINGS // for win32 with fopen secure warning
 #include "iniconfig.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#define CONFIG_FILE_LINE_MAXLENGTH 100
+#define CONFIG_FILE_LINE_MAXLENGTH 1024
 
 void addNode(struct ConfigNode **n, char * name, char *val)
 {
@@ -23,27 +24,29 @@ void addNode(struct ConfigNode **n, char * name, char *val)
 
 struct ConfigNode* ConfigLoad(const char *filename)
 {
-    FILE * f;
-    errno_t err = fopen_s(&f, filename, "r"); // open file with safe fopen
-    if(err != 0) // check for errors
+    FILE * f = fopen(filename, "r"); // open file
+    if(f == NULL) // check for open error
     {
        return NULL; // file not opened, returning
     }
-    char str[CONFIG_FILE_LINE_MAXLENGTH]; // buffer for read line from file
+    char *str = (char*)malloc(CONFIG_FILE_LINE_MAXLENGTH); // buffer for read line from file
     char *tok = NULL; // temp pointer for strings searching
+    char *tmp = NULL;
     char *name = NULL, *value = NULL; // temp to allocate memory for names and values
     struct ConfigNode *begin = NULL; // begin of config nodes
+    int len = 0; // temporary length var
     while(!feof(f)) // while end of file not reached
     {
-        fgets(str, 99, f); // read line from file
-        char *tmp = str;
+        memset(str, 0, CONFIG_FILE_LINE_MAXLENGTH);
+        fgets(str, CONFIG_FILE_LINE_MAXLENGTH - 1, f); // read line from file
+        tmp = str;
         tok = strchr(tmp, '='); // search name, that before '='
         if (tok == NULL)
         {
             continue; // '=' not found, go to next line
         }
         // found, allocate memory for it
-        int len = tok - tmp; // calc string length
+        len = tok - tmp; // calc string length
         name = (char*)malloc(len + 1); // allocate memory for parameter name
         memset(name, 0, len + 1); // fill it with zero
         strncpy(name, tmp, len); // copy name
@@ -69,6 +72,7 @@ struct ConfigNode* ConfigLoad(const char *filename)
 
         addNode(&begin, name, value); // create new node.
     }
+    free(str);
     fclose(f); // close file
     return begin; // return begin of list
 }
