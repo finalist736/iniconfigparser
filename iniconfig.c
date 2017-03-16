@@ -6,6 +6,20 @@
 
 #define CONFIG_FILE_LINE_MAXLENGTH 1024
 
+int trimWhiteSpaceLeftLength(char *tok)
+{
+    int trimTemp = 0;
+    while (*((tok-1) - trimTemp) == ' ') {
+        trimTemp++;
+    }
+    return trimTemp;
+}
+char *trimWhiteSpaceRight(char *tmp)
+{
+    while (*tmp == ' ') tmp++;
+    return tmp;
+}
+
 struct ConfigNode* ConfigLoad(const char *filename)
 {
     FILE * f = fopen(filename, "r"); // open file
@@ -41,6 +55,8 @@ struct ConfigNode* ConfigLoad(const char *filename)
         }
 
         tmp = str;
+        // need trim whitespaces
+        tmp = trimWhiteSpaceRight(tmp);
         tok = strchr(tmp, '='); // search name, that before '='
         if (tok == NULL)
         {
@@ -48,11 +64,13 @@ struct ConfigNode* ConfigLoad(const char *filename)
         }
         // found, allocate memory for it
         len = tok - tmp; // calc string length
+        // need trim whitespaces
+        len -= trimWhiteSpaceLeftLength(tok);
         name = (char*)malloc(len + 1); // allocate memory for parameter name
         memset(name, 0, len + 1); // fill it with zero
         strncpy(name, tmp, len); // copy name
         // search value, that after =
-        tmp = tok + 1; // move to next symbol
+        tmp = trimWhiteSpaceRight(tok + 1); // move to next symbol
         tok = strchr(tmp, '\n'); // search end of lne
         if (tok == NULL) // new line not found
         {
@@ -62,10 +80,12 @@ struct ConfigNode* ConfigLoad(const char *filename)
                 len = 0; // allocate 0 bytes for empty string
             } else {
                 len = tok - tmp; // calc string length
+                len -= trimWhiteSpaceLeftLength(tok);
             }
         }
         else {
             len = tok - tmp; // calc string length
+            len -= trimWhiteSpaceLeftLength(tok);
         }
         value = (char*)malloc(len + 1); // allocate for value
         memset(value, 0, len + 1); // fill it with zero
