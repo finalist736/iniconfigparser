@@ -6,6 +6,9 @@
 
 #define CONFIG_FILE_LINE_MAXLENGTH 1024
 
+// value of parameter can ends with this chars by priority
+static const char endLineCharacters[] = {';', '#', '\n', '\0'};
+
 int trimWhiteSpaceLeftLength(char *tok)
 {
     int trimTemp = 0;
@@ -32,7 +35,7 @@ struct ConfigNode* ConfigLoad(const char *filename)
     char *tmp = NULL;
     char *name = NULL, *value = NULL; // temp to allocate memory for names and values
     struct ConfigNode *begin = NULL; // begin of config nodes
-    int len = 0; // temporary length var
+    int len = 0, endLineCharIterator = 0; // temporary length var
     char firstLetter = ' ';
     while(!feof(f)) // while end of file not reached
     {
@@ -71,21 +74,21 @@ struct ConfigNode* ConfigLoad(const char *filename)
         strncpy(name, tmp, len); // copy name
         // search value, that after =
         tmp = trimWhiteSpaceRight(tok + 1); // move to next symbol
-        tok = strchr(tmp, '\n'); // search end of lne
-        if (tok == NULL) // new line not found
+
+        //tok = strchar(tmp, ';'); // search inline comment
+        //tok = strchar(tmp, '#'); // search inline comment
+
+        len = 0;
+        for (endLineCharIterator = 0; endLineCharIterator < sizeof(endLineCharacters); endLineCharIterator++)
         {
-            tok = strchr(tmp, '\0'); // search for <end of line>, in case this line last
-            if (tok == NULL) // not found, maybe empty parameter?
+            tok = strchr(tmp, endLineCharacters[endLineCharIterator]); // search end line character
+            if (tok == 0)
             {
-                len = 0; // allocate 0 bytes for empty string
-            } else {
-                len = tok - tmp; // calc string length
-                len -= trimWhiteSpaceLeftLength(tok);
+                continue;
             }
-        }
-        else {
             len = tok - tmp; // calc string length
             len -= trimWhiteSpaceLeftLength(tok);
+            break;
         }
         value = (char*)malloc(len + 1); // allocate for value
         memset(value, 0, len + 1); // fill it with zero
