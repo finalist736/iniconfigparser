@@ -177,3 +177,36 @@ char *ConfigValueString(struct ConfigNode *node)
     }
     return ""; // empty const char *
 }
+
+int ConfigNodeInt(struct ConfigNode *begin, const char *name, int defaultValue)
+{
+    struct ConfigNode* node = ConfigGetNode(begin, name);
+    if (node == NULL)
+    {
+        return defaultValue;
+    }
+    return ConfigValueInt(node);
+}
+
+char ConfigNodeChar(struct ConfigNode *begin, const char *name, char defaultValue)
+{
+    struct ConfigNode* node = ConfigGetNode(begin, name);
+    if (node == NULL)
+    {
+        return defaultValue;
+    }
+    return ConfigValueChar(node);
+}
+
+
+
+
+float ConfigNodeFloat(struct ConfigNode *begin, const char *name, float defaultValue)
+{
+    struct ConfigNode* node = ConfigGetNode(begin, name);
+    if (node == NULL)
+    {
+        return defaultValue;
+    }
+    return ConfigValueFloat(node);
+}

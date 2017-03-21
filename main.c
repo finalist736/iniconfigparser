@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    printf("%c\n", ConfigNodeChar(config, "test", 'a')); // with default value
     struct ConfigNode* result = ConfigGetNode(config, "test");
     if (result != NULL)
     {

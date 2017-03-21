@@ -17,4 +17,8 @@ char ConfigValueChar(struct ConfigNode* node);
 float ConfigValueFloat(struct ConfigNode* node);
 char *ConfigValueString(struct ConfigNode* node);
 
+int ConfigNodeInt(struct ConfigNode* begin, const char* name, int defaultValue);
+char ConfigNodeChar(struct ConfigNode* begin, const char* name, char defaultValue);
+float ConfigNodeFloat(struct ConfigNode* begin, const char* name, float defaultValue);
+
 #endif // INICONFIG_H
